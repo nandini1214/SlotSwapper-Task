@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hook";
-import { clearSwapStatus, fetchSwapRequests, respondSwapRequest } from "../redux/slices/swapSlice";
+import {
+  clearSwapStatus,
+  fetchSwapRequests,
+  respondSwapRequest,
+} from "../redux/slices/swapSlice";
 
 const NotificationsRequestsView: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -12,10 +16,10 @@ const NotificationsRequestsView: React.FC = () => {
 
   // Fetch requests whenever the active tab changes
   useEffect(() => {
-    dispatch(fetchSwapRequests( activeTab ));
+    dispatch(fetchSwapRequests(activeTab));
   }, [dispatch, activeTab]);
 
-  // Clear success/error messages after 3 seconds
+  // Auto-clear success/error messages
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => dispatch(clearSwapStatus()), 3000);
@@ -27,92 +31,114 @@ const NotificationsRequestsView: React.FC = () => {
     dispatch(respondSwapRequest({ request_id: requestId, accept }));
   };
 
-  // Determine which list to display based on the active tab
-//   const displayedRequests = activeTab === "incoming" ? incomingRequests : outgoingRequests;
-
   return (
-    <div className="p-6 space-y-8">
-      <h2 className="text-2xl font-bold">Notifications / Requests</h2>
+   
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          Notifications & Requests
+        </h2>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {success && <p className="text-green-500">{success}</p>}
+        {/* Alerts */}
+        {loading && <p className="text-blue-600 text-center">Loading...</p>}
+        {error && <p className="text-red-500 text-center">{error}</p>}
+        {success && <p className="text-green-500 text-center">{success}</p>}
 
-      {/* Tabs */}
-      <div className="flex space-x-4 mb-4">
-        <button
-          className={`px-3 py-1 rounded ${activeTab === "incoming" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setActiveTab("incoming")}
-        >
-          Received Requests
-        </button>
-        <button
-          className={`px-3 py-1 rounded ${activeTab === "outgoing" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setActiveTab("outgoing")}
-        >
-          Sent Requests
-        </button>
-      </div>
+        {/* Tabs */}
+        <div className="flex justify-center mb-6 border-b border-gray-200">
+          {["incoming", "outgoing"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as "incoming" | "outgoing")}
+              className={`px-6 py-3 text-sm font-medium transition-all duration-200 
+                ${
+                  activeTab === tab
+                    ? "border-b-4 border-blue-600 text-blue-600"
+                    : "text-gray-500 hover:text-blue-500"
+                }`}
+            >
+              {tab === "incoming" ? "Received Requests" : "Sent Requests"}
+            </button>
+          ))}
+        </div>
 
-      {/* Requests List */}
-      <div>
-        {requests.length === 0 ? (
-          <p>No {activeTab === "incoming" ? "received" : "sent"} requests</p>
-        ) : (
-          <ul className="space-y-2">
-            {requests.map((req) => (
-              <li
+        {/* Requests List */}
+        <div className="space-y-4">
+          {requests.length === 0 ? (
+            <p className="text-center text-gray-500 py-6">
+              No {activeTab === "incoming" ? "received" : "sent"} requests yet.
+            </p>
+          ) : (
+            requests.map((req) => (
+              <div
                 key={req.id}
-                className="border p-3 rounded flex justify-between items-center"
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md bg-gray-50 transition"
               >
-                <div>
+                <div className="flex-1">
                   {activeTab === "incoming" ? (
                     <>
-                      <p>
-                        From User {req.requester_id} – Swap their slot {req.their_slot_id} with your slot {req.my_slot_id}
+                      <p className="text-gray-800">
+                        <span className="font-semibold">From:</span> User{" "}
+                        {req.requester_id}
                       </p>
-                      <p>Status: {req.status}</p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Their Slot:</span>{" "}
+                        {req.their_slot_id} → <span className="font-semibold">Your Slot:</span>{" "}
+                        {req.my_slot_id}
+                      </p>
                     </>
                   ) : (
                     <>
-                      <p>
-                        To User {req.receiver_id} – Swap your slot {req.my_slot_id} with their slot {req.their_slot_id}
+                      <p className="text-gray-800">
+                        <span className="font-semibold">To:</span> User{" "}
+                        {req.receiver_id}
                       </p>
-                      <p>{req.status === "pending" ? "Pending..." : req.status}</p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Your Slot:</span>{" "}
+                        {req.my_slot_id} → <span className="font-semibold">Their Slot:</span>{" "}
+                        {req.their_slot_id}
+                      </p>
                     </>
                   )}
                 </div>
 
-                {/* Only show buttons for incoming requests */}
-                {(activeTab === "incoming" && req.status == "PENDING" ) ? (
-                  <div className="space-x-2">
-                    <button
-                      onClick={() => handleRespond(req.id, true)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                {/* Status or Actions */}
+                <div className="mt-4 sm:mt-0 sm:ml-6 flex space-x-3">
+                  {activeTab === "incoming" && req.status === "PENDING" ? (
+                    <>
+                      <button
+                        onClick={() => handleRespond(req.id, true)}
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleRespond(req.id, false)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        req.status === "ACCEPTED"
+                          ? "bg-green-100 text-green-700"
+                          : req.status === "REJECTED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
                     >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() => handleRespond(req.id, false)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                ):(
-                    <button 
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                    
-                    >
-                        ACCEPTED
-                    </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+                      {req.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+  
   );
 };
 

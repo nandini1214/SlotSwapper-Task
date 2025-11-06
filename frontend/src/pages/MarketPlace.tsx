@@ -18,19 +18,19 @@ const Marketplace = () => {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch all available swappable slots on mount
+  // Fetch swappable slots on mount
   useEffect(() => {
     dispatch(fetchSwappableSlots());
   }, [dispatch]);
 
-  // Handle swap request button
+  // Request swap
   const handleRequestSwap = (slotId: number) => {
     setSelectedSlot(slotId);
-    dispatch(fetchEvents()); // Fetch the user's events dynamically
+    dispatch(fetchEvents());
     setModalOpen(true);
   };
 
-  // Handle when user picks their own slot to offer
+  // Select user slot
   const handleSelectMySlot = (mySlotId: number) => {
     if (!selectedSlot) return;
     dispatch(
@@ -42,55 +42,69 @@ const Marketplace = () => {
     setModalOpen(false);
   };
 
-  if (slotsLoading) {
-    return <div className="text-center mt-10 text-lg">Loading available slots...</div>;
-  }
-
   return (
-    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {/* Render available swappable slots */}
-      {swappableSlots.length === 0 ? (
-        <p className="text-gray-600 text-center col-span-full">
-          No available slots for swapping.
+    <div >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">
+          Slot Marketplace
+        </h1>
+        <p className="text-center text-gray-600 mb-10">
+          Browse available slots and request a swap instantly ✨
         </p>
-      ) : (
-        swappableSlots.map((slot) => (
-          <div
-            key={slot.id}
-            className="border border-gray-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white"
-          >
-            <p className="text-gray-800">
-              <b>Time:</b> {slot.start_time}
-            </p>
-            <p className="text-gray-800">
-              <b>Status:</b> {slot.status}
-            </p>
-            <p className="text-gray-800">
-              <b>Title:</b> {slot.title || "Untitled"}
-            </p>
-            <button
-              onClick={() => handleRequestSwap(slot.id)}
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
-            >
-              Request Swap
-            </button>
-          </div>
-        ))
-      )}
 
-      {/* Modal to select user's own slot */}
+        {/* Loading state */}
+        {slotsLoading ? (
+          <div className="text-center text-lg text-gray-700 mt-10 animate-pulse">
+            Loading available slots...
+          </div>
+        ) : swappableSlots.length === 0 ? (
+          <div className="text-center text-gray-500 mt-20">
+            <p className="text-2xl mb-2">😔</p>
+            <p>No available slots for swapping right now.</p>
+          </div>
+        ) : (
+          // Slots Grid
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {swappableSlots.map((slot) => (
+              <div
+                key={slot.id}
+                className="bg-white border border-gray-200 rounded-xl shadow-md p-6 hover:shadow-lg hover:scale-[1.02] transition-transform duration-200"
+              >
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  {slot.title || "Untitled Event"}
+                </h2>
+                <p className="text-sm text-gray-600 mb-1">
+                  <b>Time:</b> {new Date(slot.start_time).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  <b>Status:</b> {slot.status}
+                </p>
+                <button
+                  onClick={() => handleRequestSwap(slot.id)}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Request Swap
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl animate-fadeIn">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 text-center">
               Select Your Slot to Offer
             </h2>
 
             {eventsLoading ? (
-              <p className="text-gray-600 text-sm">Loading your events...</p>
+              <p className="text-center text-gray-600">Loading your events...</p>
             ) : events.length === 0 ? (
-              <p className="text-gray-600 text-sm">
-                You have no available swappable events.
+              <p className="text-center text-gray-600">
+                You have no available events to swap.
               </p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -98,9 +112,9 @@ const Marketplace = () => {
                   <button
                     key={event.id}
                     onClick={() => handleSelectMySlot(event.id)}
-                    className="w-full border p-3 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-left"
+                    className="w-full border border-gray-200 p-3 rounded-lg text-left hover:bg-blue-50 transition-colors"
                   >
-                    <p className="font-medium">
+                    <p className="font-medium text-gray-800">
                       {new Date(event.start_time).toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-600">{event.status}</p>
@@ -111,7 +125,7 @@ const Marketplace = () => {
 
             <button
               onClick={() => setModalOpen(false)}
-              className="mt-4 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded-lg"
+              className="mt-5 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-medium transition-colors"
             >
               Cancel
             </button>
