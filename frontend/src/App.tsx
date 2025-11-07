@@ -11,7 +11,7 @@ import Register from "./pages/RegisterPage";
 import { Toaster } from "react-hot-toast";
 
 function App() {
-  console.log(localStorage.getItem("access_token"))
+  
 
   return (
     <BrowserRouter>

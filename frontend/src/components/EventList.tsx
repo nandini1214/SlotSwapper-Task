@@ -77,48 +77,48 @@ const EventList: React.FC = () => {
         </p>
       ) : (
         <ul className="space-y-4">
-          {events?.map((event) => (
+          {events?.map((eve) => (
             <li
-              key={event.id}
+              key={eve.id}
               className="flex flex-col sm:flex-row justify-between sm:items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all bg-gray-50"
             >
               {/* Left side: Event Info */}
               <div>
                 <p className="text-lg font-semibold text-gray-800">
-                  {event.title || "Untitled Event"}
+                  {eve.title || "Untitled Event"}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {new Date(event.start_time).toLocaleString()} →{" "}
-                  {new Date(event.end_time).toLocaleString()}
+                  {new Date(eve.start_time).toLocaleString()} →{" "}
+                  {new Date(eve.end_time).toLocaleString()}
                 </p>
                 <span
                   className={`inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full ${
-                    event.status === "BUSY"
+                    eve.status === "BUSY"
                       ? "bg-red-100 text-red-700"
-                      : event.status === "SWAPPABLE"
+                      : eve.status === "SWAPPABLE"
                       ? "bg-green-100 text-green-700"
                       : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
-                  {event.status}
+                  {eve.status}
                 </span>
               </div>
 
               {/* Right side: Action Buttons */}
               <div className="flex flex-wrap gap-2 mt-3 sm:mt-0">
                 <button
-                  onClick={() => toggleStatus(event)}
+                  onClick={() => toggleStatus(eve)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    event.status === "BUSY"
+                    eve.status === "BUSY"
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-yellow-500 text-white hover:bg-yellow-600"
                   }`}
                 >
-                  {event.status === "BUSY" ? "Make Swappable" : "Mark Busy"}
+                  {eve.status === "BUSY" ? "Make Swappable" : "Mark Busy"}
                 </button>
 
                 <button
-                  onClick={() => handleDelete(event.id)}
+                  onClick={() => handleDelete(eve.id)}
                   className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 flex items-center gap-1"
                 >
                   <Trash2 className="w-4 h-4" /> Delete
