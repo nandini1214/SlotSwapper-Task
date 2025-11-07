@@ -117,7 +117,7 @@ const swapSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      .addCase(createSwapRequest.fulfilled, (state, action) => {
+      .addCase(createSwapRequest.fulfilled, (state) => {
         state.success = "Swap request sent successfully!";
       })
       .addCase(createSwapRequest.rejected, (state, action) => {

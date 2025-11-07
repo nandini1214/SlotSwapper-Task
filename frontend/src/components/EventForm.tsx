@@ -7,7 +7,7 @@ import { Calendar, Clock, FileText } from "lucide-react"; // lucide-react for ic
 
 const EventForm: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { user, token } = useAppSelector((state) => state.auth);
+  const {  token } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState("");
