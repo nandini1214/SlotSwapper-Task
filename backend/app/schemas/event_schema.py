@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
+from app.schemas.user_schema import UserResponse
 class EventStatus(str, Enum):
     BUSY = "BUSY"
     SWAPPABLE = "SWAPPABLE"
@@ -17,7 +18,8 @@ class EventCreate(EventBase):
 
 class EventResponse(EventBase):
     id: int
-    user_id :int
+    user_id: int
+    user : UserResponse | None = None
     created_at: datetime
     class Config:
         orm_mode = True

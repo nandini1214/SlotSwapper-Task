@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosClient from "../../api/axiosClient";
-
+import type {User} from "./authSlice"
 export interface Slot {
   id: number;
   start_time: string;
   user_id: number;
+  end_time: string;
+  user: User;
   status: string;
   title:string
 }

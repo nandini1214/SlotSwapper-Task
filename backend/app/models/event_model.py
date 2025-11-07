@@ -22,8 +22,6 @@ class Event(Base):
     status = Column(Enum(EventStatus), default=EventStatus.BUSY, nullable=False)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-
+    user = relationship("User",back_populates="events")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship to user
-    owner = relationship("User", back_populates="events")

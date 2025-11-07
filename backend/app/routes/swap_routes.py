@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status , Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session , joinedload
 from app import models, schemas
 from app.dependencies import get_db, get_current_user
 from app.models.event_model import EventStatus
@@ -8,9 +8,9 @@ from app.models.swap_model import SwapStatus
 router = APIRouter(prefix="/api", tags=["Swaps"])
 
 # 1️⃣ Get all swappable slots (except current user's)
-@router.get("/swappable-slots")
+@router.get("/swappable-slots", response_model=list[schemas.event_schema.EventResponse])
 def get_swappable_slots(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    slots = db.query(models.Event).filter(
+    slots = db.query(models.Event).options(joinedload(models.Event.user)).filter(
         models.Event.status == EventStatus.SWAPPABLE,
         models.Event.user_id != current_user.id
     ).all()
@@ -83,7 +83,7 @@ def respond_swap_request(request_id: int, response: schemas.swap_schema.SwapResp
 
     if response.accept:
         # Swap ownership
-        my_slot.owner_id, their_slot.user_id = their_slot.user_id, my_slot.user_id
+        my_slot.user_id, their_slot.user_id = their_slot.user_id, my_slot.user_id
         my_slot.status = EventStatus.BUSY
         their_slot.status = EventStatus.BUSY
         swap_req.status = SwapStatus.ACCEPTED
