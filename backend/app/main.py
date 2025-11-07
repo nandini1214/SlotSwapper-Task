@@ -7,7 +7,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SlotSwapper API")
 origins = [
-    "https://your-frontend-domain.vercel.app",  # 👈 exact frontend domain
+    "https://slot-swapper-task-theta.vercel.app",  # 👈 exact frontend domain
     "http://localhost:5173",                    # for local testing
 ]
 
