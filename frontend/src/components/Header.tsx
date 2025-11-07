@@ -3,16 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../app/hook";
 import { logout } from "../redux/slices/authSlice";
 import { persistor } from "../redux/store";
+import Swal from "sweetalert2";
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    
+
+    const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to undo this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#2563EB",
+    cancelButtonColor: "#D1D5DB",
+    confirmButtonText: "Yes, Logout it!",
+  });
+
+  if (result.isConfirmed) {
     dispatch(logout());
+   
     localStorage.clear();
     persistor.purge();
+    Swal.fire("Logout", "You Logged out", "success");
     navigate("/login");
+  }
   };
 
   return (

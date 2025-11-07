@@ -8,7 +8,8 @@ export interface Slot {
   end_time: string;
   user: User;
   status: string;
-  title:string
+  title:string;
+  detail:string
 }
 
 export interface SwapRequest {
@@ -42,6 +43,9 @@ export const fetchSwappableSlots = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosClient.get("/api/swappable-slots");
+       if (res.data?.detail) {
+        return rejectWithValue(res.data.detail);
+      }
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.detail || "Failed to fetch slots");
@@ -115,6 +119,7 @@ const swapSlice = createSlice({
       .addCase(fetchSwappableSlots.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        state.swappableSlots = []
       })
 
       .addCase(createSwapRequest.fulfilled, (state) => {

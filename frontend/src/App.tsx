@@ -8,6 +8,7 @@ import NotificationsRequestsView from "./pages/NotificationRequestView";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import Register from "./pages/RegisterPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   console.log(localStorage.getItem("access_token"))
@@ -25,8 +26,19 @@ function App() {
         <Route path="/signup" element={<Register/>}/>
       </Routes>
     
-     
+     <Toaster
+        position="top-right"
+        toastOptions={{
+          success: {
+            style: { background: "#D1FAE5", color: "#065F46" },
+          },
+          error: {
+            style: { background: "#FEE2E2", color: "#991B1B" },
+          },
+        }}
+      />
     </BrowserRouter>
+    
   )
   
   

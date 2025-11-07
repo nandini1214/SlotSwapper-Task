@@ -1,13 +1,25 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hook";
-import { createSwapRequest, fetchSwappableSlots } from "../redux/slices/swapSlice";
+import {
+  createSwapRequest,
+  fetchSwappableSlots,
+} from "../redux/slices/swapSlice";
 import { fetchEvents } from "../redux/slices/eventSlice";
-import { Calendar, Clock, User2, Loader2 } from "lucide-react";
+import { Calendar, Loader2, AlertCircle, CalendarX2 } from "lucide-react";
+import { useToast } from "../app/showToast";
+import toast from "react-hot-toast";
 
 const Marketplace = () => {
   const dispatch = useAppDispatch();
-  const { swappableSlots, loading: slotsLoading } = useAppSelector((state) => state.swap);
-  const { events, loading: eventsLoading } = useAppSelector((state) => state.event);
+  const {showToast} = useToast();
+  const {
+    swappableSlots,
+    loading: slotsLoading,
+    error,
+  } = useAppSelector((state) => state.swap);
+  const { events, loading: eventsLoading } = useAppSelector(
+    (state) => state.event
+  );
 
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -16,15 +28,26 @@ const Marketplace = () => {
     dispatch(fetchSwappableSlots());
   }, [dispatch]);
 
-  const handleRequestSwap = (slotId: number) => {
+ const handleRequestSwap = async (slotId: number) => {
     setSelectedSlot(slotId);
-    dispatch(fetchEvents());
-    setModalOpen(true);
+    showToast("Fetching your available events...", "loading"); 
+
+    try {
+      await dispatch(fetchEvents()).unwrap(); 
+      toast.dismiss(); 
+      showToast("Events loaded successfully 🎉", "success");
+      setModalOpen(true);
+    } catch (err) {
+      toast.dismiss();
+      showToast("Failed to load your events. Please try again.", "error");
+    }
   };
 
   const handleSelectMySlot = (mySlotId: number) => {
     if (!selectedSlot) return;
-    dispatch(createSwapRequest({ my_slot_id: mySlotId, their_slot_id: selectedSlot }));
+    dispatch(
+      createSwapRequest({ my_slot_id: mySlotId, their_slot_id: selectedSlot })
+    );
     setModalOpen(false);
   };
 
@@ -40,45 +63,46 @@ const Marketplace = () => {
             Browse available slots and request a swap instantly ✨
           </p>
         </div>
-
-        {/* Loading / Empty / Grid */}
-        {slotsLoading ? (
+        {slotsLoading && (
           <div className="flex justify-center items-center mt-20 text-gray-600">
-            <Loader2 className="animate-spin w-6 h-6 mr-2" /> Loading available slots...
+            <Loader2 className="animate-spin w-6 h-6 mr-2" /> Loading available
+            slots...
           </div>
-        ) : swappableSlots.length === 0 ? (
-          <div className="text-center text-gray-500 mt-20">
-            <p className="text-5xl mb-4">😔</p>
-            <p className="text-lg">No available slots for swapping right now.</p>
+        )}
+
+        {error && (
+          <div className="flex flex-col items-center justify-center text-gray-600 mt-20 space-y-3">
+            <AlertCircle className="w-10 h-10 text-red-500" />
+            <p className="text-lg font-medium">{error}</p>
           </div>
-        ) : (
+        )}
+
+        {!slotsLoading && !error && swappableSlots.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-gray-600 mt-20 space-y-3">
+            <CalendarX2 className="w-10 h-10 text-gray-400" />
+            <p>No available slots right now.</p>
+          </div>
+        )}
+
+        {!slotsLoading && !error && swappableSlots.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {swappableSlots.map((slot) => (
               <div
                 key={slot.id}
                 className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition-all p-6"
               >
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {slot.title || "Untitled Event"}
-                </h2>
-
-                <div className="text-sm text-gray-700 space-y-1">
-                  <p className="flex items-center gap-2">
-                    <User2 className="w-4 h-4 text-blue-600" />
-                    <b>Hosted by:</b> {slot.user?.name || "Unknown"}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <b>Time:</b> {new Date(slot.start_time).toLocaleString()}
-                  </p>
-                  <p>
-                    <b>Status:</b> <span className="text-blue-600">{slot.status}</span>
-                  </p>
-                </div>
-
+                </h3>
+                <p className="text-gray-600 text-sm mb-1">
+                  <b>Starts:</b> {new Date(slot.start_time).toLocaleString()}
+                </p>
+                <p className="text-gray-600 text-sm">
+                  <b>Status:</b> {slot.status}
+                </p>
                 <button
                   onClick={() => handleRequestSwap(slot.id)}
-                  className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
                 >
                   Request Swap
                 </button>
@@ -96,15 +120,18 @@ const Marketplace = () => {
               Select Your Slot to Offer
             </h2>
 
-            {eventsLoading ? (
+            {eventsLoading && (
               <div className="text-center text-gray-600 flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" /> Loading your events...
+                <Loader2 className="w-5 h-5 animate-spin" /> Loading your
+                events...
               </div>
-            ) : events.length === 0 ? (
+            )}
+            {events.length === 0 && (
               <p className="text-center text-gray-600">
                 You have no available events to swap.
               </p>
-            ) : (
+            )}
+            {!eventsLoading && events.length > 0 && (
               <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                 {events.map((event) => (
                   <button

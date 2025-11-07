@@ -6,11 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SlotSwapper API")
-
+origins = [
+    "https://your-frontend-domain.vercel.app",  # 👈 exact frontend domain
+    "http://localhost:5173",                    # for local testing
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

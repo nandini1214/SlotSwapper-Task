@@ -2,22 +2,29 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../redux/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "../app/hook";
+import { useToast } from "../app/showToast";
 
 export default function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error, token } = useAppSelector((state) => state.auth);
+  const {showToast} = useToast()
+  const { loading, error, token ,user} = useAppSelector((state) => state.auth);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (token) navigate("/");
+    if (token) {
+      showToast(`welcome!, ${user?.name} `, "success")
+      navigate("/")};
   }, [token, navigate]);
-
+   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    dispatch(loginUser({ email, password })).then(()=>{
+      showToast(`Logged in successfully` , "success")
+      navigate("/")
+    })
   };
 
   return (

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { deleteEvent, updateEvent, fetchEvents } from "../redux/slices/eventSlice";
 import { useAppDispatch, useAppSelector } from "../app/hook";
 import { CalendarDays, Trash2, RefreshCcw, Clock } from "lucide-react";
+import Swal from "sweetalert2";
 
 const EventList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -11,10 +12,25 @@ const EventList: React.FC = () => {
     dispatch(fetchEvents());
   }, [dispatch]);
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this event?")) {
-      dispatch(deleteEvent(id));
-    }
+  const handleDelete = async (id: number) => {
+    const result = await Swal.fire({
+        title: "Are you sure , you want to delete?",
+        text: "You won't be able to undo this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d3311fff",
+        cancelButtonColor: "#99a0aaff",
+        confirmButtonText: "Yes, Delete",
+      });
+    
+      if (result.isConfirmed) {
+          dispatch(deleteEvent(id)).then(()=>{
+           Swal.fire("Deleted", "Your Event Got deleted", "success");
+          });
+       
+
+      }
+   
   };
 
   const toggleStatus = (event: any) => {
@@ -55,13 +71,13 @@ const EventList: React.FC = () => {
         </button>
       </div>
 
-      {events.length === 0 ? (
+      {events?.length === 0 ? (
         <p className="text-gray-500 text-center py-6">
           No events found. Create one to get started!
         </p>
       ) : (
         <ul className="space-y-4">
-          {events.map((event) => (
+          {events?.map((event) => (
             <li
               key={event.id}
               className="flex flex-col sm:flex-row justify-between sm:items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all bg-gray-50"

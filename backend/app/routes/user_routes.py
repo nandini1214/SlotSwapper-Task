@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.user_schema.UserResponse,
 )
-def create_user(user: schemas.UserCreate, db: session = Depends(get_db)):
+def create_user(user: schemas.user_schema.UserCreate, db: session = Depends(get_db)):
     existing_user = (
         db.query(models.user_model.User)
         .filter(models.user_model.User.email == user.email)
@@ -33,7 +33,7 @@ def create_user(user: schemas.UserCreate, db: session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@router.post("/login")
+@router.post("/login", response_model=schemas.user_schema.TokenResponse ,status_code=status.HTTP_202_ACCEPTED)
 def login_user(
     user_credentials: schemas.user_schema.LoginSchema,
     db: session = Depends(get_db)
@@ -59,7 +59,7 @@ def login_user(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": {"id": user.id, "name": user.name, "email": user.email},
+        "user":user,
     }
 
 @router.get("/me")
