@@ -141,5 +141,6 @@ uvicorn main:app --reload
 * Ensuring proper JWT authentication for all protected endpoints.
 
 **vercelUrl:** 
-* Live `https://slot-swapper-task-theta.vercel.app/`
+<!-- * Live `https://slot-swapper-task-theta.vercel.app/` -->
+[Live Link](https://slot-swapper-task-theta.vercel.app/)
 
