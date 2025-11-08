@@ -140,5 +140,6 @@ uvicorn main:app --reload
 * Handling edge cases where multiple users may request the same swappable slot simultaneously.
 * Ensuring proper JWT authentication for all protected endpoints.
 
-
+**vercelUrl:** 
+* Live `https://slot-swapper-task-theta.vercel.app/`
 
